@@ -146,11 +146,6 @@ export const useMainStore = defineStore('mainStore', {
         const response = await axios.post(
           `${this.serverUrl}upload/`, 
           formData,
-          {
-            headers: {
-              'Content-Type': 'multipart/form-data'
-            },
-          }
         );
         console.log(response);
       } catch (error) {
