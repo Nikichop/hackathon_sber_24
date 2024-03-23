@@ -26,6 +26,22 @@ def parse_csv_with_multiple_parents(csv_content: str) -> List[Dict]:
 
     return list(objects.values())
 
+def put_data_to_tracker(parsed_csv: dict):
+    for task in parsed_csv:
+        if len(client.issues.find(f'Summary: "{task['Имя']}" Resolution: empty() Queue: "GYM"')) > 0:
+            issues = client.issues.find(f'Summary: "{task['Имя']}" Resolution: empty() Queue: "GYM"')
+            continue
+
+        issue = client.issues.create(queue='Gym', summary=task['Имя'])
+        if task['Команда'] not in [board.name for board in client.boards]:
+            client.boards.create(name=task['Команда'], defaultQueue='GYM')
+
+        board_id = 1
+        for board in client.boards:
+            if board.name == task['Команда']:
+                board_id = board.id
+        issue.update(boards=[{'id': board_id}])
+
 
 @app.post("/upload/")
 async def upload_csv(file: UploadFile = File(...)):
@@ -34,11 +50,8 @@ async def upload_csv(file: UploadFile = File(...)):
         try:
             csv_content = (await file.read()).decode('utf-8')
             data = parse_csv_with_multiple_parents(csv_content)
-            for task in data:
-                if len(client.issues.find(f'Summary: "{task['Имя']}" Resolution: empty() Queue: "GYM"')) > 0:
-                    continue
-                issue = client.issues.create(queue='Gym', summary=task['Имя'])
-            return {"data": data}
+            put_data_to_tracker(data)
+            return {'data': data}
         except Exception as e:
             return {"error": f"Error processing CSV file: {str(e)}"}
     else:
