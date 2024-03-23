@@ -6,33 +6,20 @@ app = FastAPI()
 
 def parse_csv_with_multiple_parents(csv_content: List[str]) -> List[Dict]:
     objects = {}
-    relationships = {}
-    is_relationship_section = False
-
     for row in csv_content:
         if row.startswith('Идентификатор'):
             headers = row.strip().split(',')
             continue
-        elif row.startswith('Родитель'):
-            is_relationship_section = True
-            continue
         elif not row.strip():
             continue
-        elif not is_relationship_section:
+        else:
             values = row.strip().split(',')
             object_id = int(values[0])
             objects[object_id] = dict(zip(headers, values))
-            objects[object_id]['Родители'] = []
-        else:
-            parent_id, child_id = row.split(',')
-            if int(child_id) in relationships:
-                relationships[int(child_id)].append(int(parent_id))
+            if values[-1]:
+                objects[object_id]['Сделать после'] = list(map(int, values[-1].strip('"').split(',')))
             else:
-                relationships[int(child_id)] = [int(parent_id)]
-
-    for child_id, parents in relationships.items():
-        if child_id in objects:
-            objects[child_id]['Родители'].extend(parents)
+                objects[object_id]['Сделать после'] = []
 
     return list(objects.values())
 
