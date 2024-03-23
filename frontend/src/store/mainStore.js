@@ -4,7 +4,7 @@ import axios from 'axios';
 export const useMainStore = defineStore('mainStore', {
   state: () => {
     return {
-      serverUrl: '',
+      serverUrl: 'http://localhost:8000/',
       sortedTasksArray: [
         [
           {
@@ -132,7 +132,7 @@ export const useMainStore = defineStore('mainStore', {
   actions: {
     async updateTasksList() {
       try {
-        const response = await axios.get(`${this.serverUrl}/`);
+        const response = await axios.get(`${this.serverUrl}upload/`);
         console.log(response)
         //this.sortedTasksArray = response.data;
       } catch (error) {
@@ -143,7 +143,7 @@ export const useMainStore = defineStore('mainStore', {
       try {
         let formData = new FormData();
         formData.append('file', file);
-        const response = await axios.post(`${this.serverUrl}/`, formData);
+        const response = await axios.post(`${this.serverUrl}upload/`, formData);
         console.log(response);
       } catch (error) {
         alert(error)
