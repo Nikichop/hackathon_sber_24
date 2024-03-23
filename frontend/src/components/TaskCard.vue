@@ -1,9 +1,9 @@
 <template>
-  <div>
     <v-card
       max-width="600"
       width="400"
       variant="outlined"
+      class="ma-12"
     >
       <v-expansion-panels>
         <v-expansion-panel>
@@ -11,7 +11,10 @@
             {{ taskTitle }}
           </v-expansion-panel-title>
           <v-expansion-panel-text>
-            <v-row v-for="param in getParametrs">
+            <v-row 
+              v-for="param in getParametrs"
+              :key="param.name"
+            >
               <v-col>
                 <v-card-text>{{ param.name }}:</v-card-text>
               </v-col>
@@ -28,7 +31,6 @@
         </v-expansion-panel>
       </v-expansion-panels>
     </v-card>
-  </div>
 </template>
 
 <script>
@@ -71,11 +73,17 @@ export default {
         done: 'Сделан',
         open: 'Открыт',
       },
+      colors: {
+
+      }
     }
   },
   computed: {
     getStatus() {
       return this.statuses[this.status];
+    },
+    getColorTitle() {
+      return 
     },
     getParametrs() {
       return [
@@ -113,5 +121,7 @@ export default {
 .v-card-text {
   padding: 0;
 }
-
+.v-row {
+  margin-top: 0,
+}
 </style>
