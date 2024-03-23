@@ -144,7 +144,7 @@ export const useMainStore = defineStore('mainStore', {
         let formData = new FormData();
         formData.append('file', file);
         const response = await axios.post(
-          `${this.serverUrl}upload`, 
+          `${this.serverUrl}upload/`, 
           formData,
           {
             headers: {

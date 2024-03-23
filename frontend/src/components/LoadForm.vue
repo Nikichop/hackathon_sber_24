@@ -14,7 +14,7 @@
             class="mr-4"
             size="large"
             :disabled="!file?.length"
-            @click="uploadFile(file)"
+            @click="uploadFile(file[0])"
           >
             Загрузить файл
           </v-btn>
