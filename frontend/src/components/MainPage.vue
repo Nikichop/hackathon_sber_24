@@ -7,6 +7,8 @@
         v-for="(value, index) in sortedTasksArray"
         :tasks="value"
         :index-number="index + 1"
+        ref="containers"
+        @focus-card="onFocus"
       ></tasks-container>
     </v-row>
 </template>
@@ -28,6 +30,25 @@ export default {
     ...mapState(useMainStore, ['sortedTasksArray'])
   },
   methods: {
+    onFocus(taskKey) {
+      let element = null;
+      this.$refs.containers.forEach(container => {
+
+        if (element) {
+          return;
+        }
+
+        container.$refs.cards.forEach(c => {
+          c.isFocused = false;
+
+          if (c.id === taskKey) {
+            element = c;
+          }
+        });
+      })
+
+      element.changeIsFocused();
+    }
   }
 }
 

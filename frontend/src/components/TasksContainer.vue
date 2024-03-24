@@ -4,14 +4,21 @@
     <div class="task_card">
       <task-card 
         v-for="value in tasks"
-        :key="value.id"
-        :task-title="value.title"
-        :time="value.time"
-        :employee="value.employee"
+        :key="value.key"
+        :id="value.key"
+        :task-title="value.name"
+        :cost="value.cost"
+        :employee="value.assignee"
         :status="value.status"
-        :startDate="value.startDate"
-        :endDate="value.endDate"
+        :startDate="value.dateStart"
+        :endDate="value.dateEnd"
+        :depends-on=value.dependsOn
         :url="value.url"
+        :group="value.group"
+        :risk="value.risk"
+        :progress="value.progress"
+        ref="cards"
+        @focus-card="onFocus"
       ></task-card>
     </div>
   </v-col>
@@ -33,6 +40,11 @@ export default {
     indexNumber: {
       type: Number,
       default: 1,
+    }
+  },
+  methods: {
+    onFocus(taskKey) {
+      this.$emit('focus-card', taskKey);
     }
   }
 }

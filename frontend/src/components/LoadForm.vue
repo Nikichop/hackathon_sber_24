@@ -2,7 +2,7 @@
   <v-form>
     <v-container>
       <v-row>
-        <v-col cols="6">
+        <v-col cols="4">
           <v-file-input
             ref="file"
             label="Выберите файл"
@@ -25,6 +25,11 @@
           >
             Обновить
           </v-btn>
+        </v-col>
+        <v-col cols="4">
+          <v-select
+            label="Отобразить для"
+          ></v-select>
         </v-col>
       </v-row>
     </v-container>
