@@ -5,12 +5,12 @@ import csv
 import io
 from starlette.middleware.cors import CORSMiddleware
 from datetime import datetime
+from collections import defaultdict
 
 app = FastAPI()
 
 origins = [
     "http://localhost:5173",
-
 ]
 
 app.add_middleware(
@@ -97,7 +97,7 @@ def get_depends_tasks(issue) -> list:
 
     return res
 
-def filter_for_level(data, group):
+def filter_for_level(data, group = None):
     res = []
     nodes = {item['key']: item for item in data}
     levels = defaultdict(list)
@@ -106,24 +106,29 @@ def filter_for_level(data, group):
         if node_id not in nodes:
             return -1
         node = nodes[node_id]
-        if not node['dependsOn']:
+        if not node.get('dependsOn'):
             return 0
         dependson_levels = [compute_level(dependent_id) for dependent_id in node['dependsOn']]
         return max(dependson_levels) + 1
 
+    max_level = 0
     for item in data:
-        if item.get('group') == group:
+        if item.get('group') == group or group == None:
             level = compute_level(item['key'])
-            levels[level].append(item)
+            max_level = max(max_level, level)
+
+    for level in range(max_level + 1):
+        for item in data:
+            if item.get('group') == group or group == None:
+                if compute_level(item['key']) == level:
+                    levels[level].append(item)
 
     for level, nodes in levels.items():
         res.append(nodes)
 
     return res
 
-
-
-def get_data_from_tracker():
+def get_data_from_tracker(group = None) -> list:
     res = []
 
     for issue in client.issues:
@@ -149,8 +154,7 @@ def get_data_from_tracker():
 
             res.append(element)
 
-    return res
-
+    return filter_for_level(res, group)
 
 @app.post("/upload/")
 async def upload_csv(file: UploadFile = File(...)):
@@ -164,5 +168,12 @@ async def upload_csv(file: UploadFile = File(...)):
             return {"error": f"Error processing CSV file: {str(e)}"}
     else:
         return {"error": "Incorrect file format. Please upload a CSV file."}
+
+@app.get("/light_weight_baby")
+async def get_new_data():
+    try:
+        return {'data': get_data_from_tracker()}
+    except Exception as e:
+        return {"error": f"Error processing CSV file: {str(e)}"}
 
 
