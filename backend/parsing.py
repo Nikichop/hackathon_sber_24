@@ -60,7 +60,7 @@ def put_data_to_tracker(parsed_csv: dict):
             issue.links.create(issue=rel_key, relationship='depends on')
 
 
-def filter_for_level(data):
+def filter_for_level(data, group):
     res = []
     nodes = {item['key']: item for item in data}
     levels = defaultdict(list)
@@ -75,26 +75,15 @@ def filter_for_level(data):
         return max(dependson_levels) + 1
 
     for item in data:
-        level = compute_level(item['key'])
-        levels[level].append(item)
+        if item.get('group') == group:
+            level = compute_level(item['key'])
+            levels[level].append(item)
 
     for level, nodes in levels.items():
         res.append(nodes)
 
     return res
 
-def filter_for_group(data):
-    nodes_by_command = {}
-
-    for node in data:
-        command = node.get('group')
-        if command not in nodes_by_command:
-            nodes_by_command[command] = []
-        nodes_by_command[command].append(node)
-
-    nodes_list_by_command = [nodes for command, nodes in nodes_by_command.items()]
-
-    return nodes_list_by_command
 
 
 def get_data_from_tracker():
