@@ -4,6 +4,7 @@ from yandex_tracker_client import TrackerClient
 import csv
 import io
 from starlette.middleware.cors import CORSMiddleware
+from datetime import datetime
 
 app = FastAPI()
 
@@ -47,7 +48,7 @@ def put_data_to_tracker(parsed_csv: dict):
 
         if task['Команда'] not in [board.name for board in client.boards]:
             client.boards.create(name=task['Команда'], defaultQueue='GYM')
-        client.issues.create(queue='Gym', summary=task['Имя'], storyPoints=task['Трудозатраты'])
+        client.issues.create(queue='Gym', summary=task['Имя'], storyPoints=task['Трудозатраты'], start=task['Дата начала'], deadline=task['Дедлайн'])
     
     for task in parsed_csv:
         board_id = [board.id for board in client.boards if board.name == task['Команда']][0]
@@ -57,8 +58,44 @@ def put_data_to_tracker(parsed_csv: dict):
         for rel in task['Сделать после']:
             rel_sum = [issue['Имя'] for issue in parsed_csv if int(issue['Идентификатор']) == int(rel)][0]
             rel_key = [issue.key for issue in client.issues if issue.summary == rel_sum and issue.resolution == None and issue.queue.key == "GYM"][0]
-            issue.links.create(issue=rel_key, relationship='depends on')
+            try:
+                issue.links.create(issue=rel_key, relationship='depends on')
+            except Exception as e:
+                if e.args[0].status_code != 422:
+                    raise e
 
+def calc_progress(start, end, status_key) -> float:
+    startDate = None
+    if start != None:
+        startDate = datetime(int(start[:4]), int(start[5:7]), int(start[8:10]), 10, 0)
+
+    endDate = None
+    if end != None:
+        endDate = datetime(int(end[:4]), int(end[5:7]), int(end[8:10]), 10, 0)
+
+    currentDate = datetime.now()
+
+    progress = 0
+    if startDate != None or endDate != None:
+        currDiff = (currentDate - startDate)
+        currDiff = currDiff.days * 24 * 60 * 60 + currDiff.seconds
+        expDiff = (endDate - startDate)
+        expDiff = expDiff.days * 24 * 60 * 60 + expDiff.seconds
+        if currDiff >= 0 and expDiff != 0:
+            progress = (currDiff / expDiff) * 100
+    if status_key == 'closed':
+        progress = 100
+
+    return progress
+
+def get_depends_tasks(issue) -> list:
+    res = []
+
+    for link in issue.links:
+        if link.direction == 'outward' and link.type.id == 'depends':
+            res.append(link.object.key)
+
+    return res
 
 def filter_for_level(data, group):
     res = []
@@ -90,21 +127,27 @@ def get_data_from_tracker():
     res = []
 
     for issue in client.issues:
-        element = {}
-        board_name = [board.name for board in client.boards if board.id == issue.boards[0]['id']][0]
-        element['key'] = issue.key
-        element['name'] = issue.summary
-        element['group'] = board_name
-        element['status'] = issue.status.key
-        element['cost'] = issue.storyPoints
-        element['risk'] = None
-        element['url'] = ""
-        element['dependsOn'] = []
-        element['dateStart'] = ""
-        element['dateEnd'] = ""
-        element['assignee'] = issue.assignee.display
+        if issue.queue.key == 'GYM':
+            element = {}
+            board_name = [board.name for board in client.boards if board.id == issue.boards[0]['id']][0]
+            element['key'] = issue.key
+            element['name'] = issue.summary
+            element['group'] = board_name
+            element['status'] = issue.status.key
+            element['cost'] = issue.storyPoints
+            element['risk'] = None # need to do
+            element['url'] = "https://tracker.yandex.ru/" + issue.key
+            element['dependsOn'] = get_depends_tasks(issue)
+            element['dateStart'] = issue.start
+            element['dateEnd'] = issue.deadline
+            element['progress'] = calc_progress(issue.start, issue.deadline, issue.status.key)
 
-        res.append(issue)
+            assignee = issue.assignee
+            if assignee != None:
+                assignee = assignee.display
+            element['assignee'] = assignee
+
+            res.append(element)
 
     return res
 
