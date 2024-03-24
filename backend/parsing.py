@@ -83,6 +83,18 @@ def filter_for_level(data):
 
     return res
 
+def filter_for_group(data):
+    nodes_by_command = {}
+
+    for node in data:
+        command = node.get('group')
+        if command not in nodes_by_command:
+            nodes_by_command[command] = []
+        nodes_by_command[command].append(node)
+
+    nodes_list_by_command = [nodes for command, nodes in nodes_by_command.items()]
+
+    return nodes_list_by_command
 
 
 def get_data_from_tracker():
