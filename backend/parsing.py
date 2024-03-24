@@ -65,9 +65,17 @@ def get_data_from_tracker():
     for issue in client.issues:
         element = {}
         board_name = [board.name for board in client.boards if board.id == issue.boards[0]['id']][0]
+        element['key'] = issue.key
         element['name'] = issue.summary
         element['group'] = board_name
+        element['status'] = issue.status.key
         element['cost'] = issue.storyPoints
+        element['risk'] = None
+        element['url'] = ""
+        element['dependsOn'] = []
+        element['dateStart'] = ""
+        element['dateEnd'] = ""
+        element['assignee'] = issue.assignee.display
 
         res.append(issue)
 
