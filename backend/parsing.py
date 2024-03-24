@@ -170,7 +170,7 @@ async def upload_csv(file: UploadFile = File(...)):
             csv_content = (await file.read()).decode('utf-8')
             data = parse_csv_with_multiple_parents(csv_content)
             put_data_to_tracker(data)
-            return {'data': get_issues_from_tracker()}
+            return {'data': get_issues_from_tracker(), 'groups': get_groups_from_tracker()}
         except Exception as e:
             return {"error": f"Error processing CSV file: {str(e)}"}
     else:
