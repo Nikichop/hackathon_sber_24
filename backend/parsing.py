@@ -8,12 +8,15 @@ from datetime import datetime
 from collections import defaultdict
 from math import exp
 
+
+from operations.mail_router import router as mail
+
 app = FastAPI()
 
 origins = [
     "http://localhost:5173",
 ]
-
+app.include_router(mail)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=origins,
