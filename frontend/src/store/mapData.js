@@ -17,7 +17,7 @@ export default [
     {
       key: '2',
       name: 'Просмотреть инструкцию',
-      status: 'inWork',
+      status: 'needInfo',
       cost: '100д 45ч 50м',
       risk: 34.543,
       assignee: 'Сергеев Сергей Сергеевич',
@@ -33,7 +33,7 @@ export default [
     {
       key: '3',
       name: 'Доставка',
-      status: 'inWork',
+      status: 'inProgress',
       cost: '100д 45ч 50м',
       risk: 34.543,
       assignee: 'Как Такович',
@@ -63,7 +63,7 @@ export default [
     {
       key: '5',
       name: 'Оформить заказ',
-      status: 'inWork',
+      status: 'inProgress',
       cost: '100д 45ч 50м',
       risk: 34.543,
       assignee: 'Иванов Иван Иванович',
@@ -77,7 +77,7 @@ export default [
     {
       key: '6',
       name: 'Просмотреть инструкцию',
-      status: 'inWork',
+      status: 'inProgress',
       cost: '100д 45ч 50м',
       risk: 34.543,
       assignee: 'Сергеев Сергей Сергеевич',
@@ -93,7 +93,7 @@ export default [
     {
       key: '7',
       name: 'Доставка',
-      status: 'inWork',
+      status: 'inProgress',
       cost: '100д 45ч 50м',
       risk: 34.543,
       assignee: 'Как Такович',
@@ -107,7 +107,7 @@ export default [
     {
       key: '8',
       name: 'Собрать каркас',
-      status: 'inWork',
+      status: 'inProgress',
       cost: '100д 45ч 50м',
       risk: 34.543,
       assignee: 'Каркасович',

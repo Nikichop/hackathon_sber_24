@@ -120,7 +120,7 @@ export default {
   data() {
     return {
       statuses: {
-        inWork: {
+        inProgress: {
           text: 'В работе',
           icon: 'mdi-timeline-clock-outline',
           color: 'orange',
@@ -134,7 +134,12 @@ export default {
           text: 'Не начато',
           icon: 'mdi-timeline-outline',
           color: 'black',
-        }  
+        },
+        needInfo: {
+          text: 'Нужна информация',
+          icon: 'mdi-information',
+          color: 'black',
+        }
       },
       isFocused: false,
     }

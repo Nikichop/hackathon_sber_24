@@ -6,7 +6,10 @@ export const useMainStore = defineStore('mainStore', {
   state: () => {
     return {
       serverUrl: 'http://localhost:8000/',
-      sortedTasksArray: mapData,
+      sortedTasksArray: [],
+      groups: ['Аля', 'Даля'],
+      selectedGroup: '',
+      isFileLoaded: false,
     }
   },
   actions: {
@@ -28,6 +31,7 @@ export const useMainStore = defineStore('mainStore', {
           formData,
         );
         console.log(response);
+        this.isFileLoaded = true;
       } catch (error) {
         alert(error)
       }
