@@ -6,6 +6,7 @@ import io
 from starlette.middleware.cors import CORSMiddleware
 from datetime import datetime
 from collections import defaultdict
+from math import exp
 
 app = FastAPI()
 
@@ -128,6 +129,47 @@ def filter_for_level(data, group = 'Любой'):
 
     return res
 
+def calc_risks(list_of_issues: list, issue = None):
+    if issue == None:
+        issue = list_of_issues[0]
+
+    list_of_parents = []
+    for key in issue['dependsOn']:
+        for dep_issue in list_of_issues:
+            if dep_issue['key'] == key:
+                list_of_parents.append(dep_issue)
+
+    mean_spending_time = issue['cost'] * 24 * 60 * 60
+    lambd = 1 / mean_spending_time
+
+    start = issue['dateStart']
+    startDate = None
+    if start != None:
+        startDate = datetime(int(start[:4]), int(start[5:7]), int(start[8:10]), 10, 0)
+
+    end = issue['dateEnd']
+    endDate = None
+    if end != None:
+        endDate = datetime(int(end[:4]), int(end[5:7]), int(end[8:10]), 10, 0)
+
+    allocated_time = (endDate - startDate)
+    allocated_time = allocated_time.days * 24 * 60 * 60 + allocated_time.seconds
+
+    luck = 1
+    if issue['status'] != 'closed':
+        luck = 1 - exp(-lambd * allocated_time) # вероятность успеть
+    for parent in list_of_parents:
+        if parent['risk'] != None:
+            luck *= 1 - parent['risk']
+        else:
+            luck *= 1 - calc_risks(list_of_issues, parent)
+
+    risk = 1 - luck # риск - вероятность опоздать, от обратного
+
+    issue['risk'] = risk
+
+    return risk
+
 def get_issues_from_tracker(group = 'Любой') -> list:
     res = []
 
@@ -153,6 +195,9 @@ def get_issues_from_tracker(group = 'Любой') -> list:
             element['assignee'] = assignee
 
             res.append(element)
+
+    for issue in res:
+        calc_risks(res, issue)
 
     return filter_for_level(res, group)
 
