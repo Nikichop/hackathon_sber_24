@@ -5,4 +5,5 @@ print([issue.key for issue in client.issues.find('Queue: GYM')])
 
 issue = client.issues['GYM-45']
 
-print(issue.id)
+print([field.key for field in client.fields])
+print([issue.start for issue in client.issues])
