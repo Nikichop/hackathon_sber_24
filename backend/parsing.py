@@ -97,7 +97,7 @@ def get_depends_tasks(issue) -> list:
 
     return res
 
-def filter_for_level(data, group = None):
+def filter_for_level(data, group = 'Любой'):
     res = []
     nodes = {item['key']: item for item in data}
     levels = defaultdict(list)
@@ -113,13 +113,13 @@ def filter_for_level(data, group = None):
 
     max_level = 0
     for item in data:
-        if item.get('group') == group or group == None:
+        if item.get('group') == group or group == 'Любой':
             level = compute_level(item['key'])
             max_level = max(max_level, level)
 
     for level in range(max_level + 1):
         for item in data:
-            if item.get('group') == group or group == None:
+            if item.get('group') == group or group == 'Любой':
                 if compute_level(item['key']) == level:
                     levels[level].append(item)
 
@@ -128,7 +128,7 @@ def filter_for_level(data, group = None):
 
     return res
 
-def get_data_from_tracker(group = None) -> list:
+def get_issues_from_tracker(group = 'Любой') -> list:
     res = []
 
     for issue in client.issues:
@@ -156,6 +156,13 @@ def get_data_from_tracker(group = None) -> list:
 
     return filter_for_level(res, group)
 
+def get_groups_from_tracker() -> list:
+    res = [board.name for board in client.boards]
+    res.remove('Gym')
+    res.remove('Garbage')
+    res.append('Любой')
+    return res
+
 @app.post("/upload/")
 async def upload_csv(file: UploadFile = File(...)):
     if file.content_type == 'text/csv':
@@ -163,16 +170,16 @@ async def upload_csv(file: UploadFile = File(...)):
             csv_content = (await file.read()).decode('utf-8')
             data = parse_csv_with_multiple_parents(csv_content)
             put_data_to_tracker(data)
-            return {'data': get_data_from_tracker()}
+            return {'data': get_issues_from_tracker()}
         except Exception as e:
             return {"error": f"Error processing CSV file: {str(e)}"}
     else:
         return {"error": "Incorrect file format. Please upload a CSV file."}
 
-@app.get("/light_weight_baby")
-async def get_new_data():
+@app.post("/light_weight_baby/{group}")
+async def get_new_data(group):
     try:
-        return {'data': get_data_from_tracker()}
+        return {'data': get_issues_from_tracker(group), 'groups': get_groups_from_tracker()}
     except Exception as e:
         return {"error": f"Error processing CSV file: {str(e)}"}
 
