@@ -44,6 +44,7 @@ def put_data_to_tracker(parsed_csv: dict):
     for task in parsed_csv:
         if len([issue for issue in client.issues if issue.summary == task['Имя'] and issue.resolution == None and issue.queue.key == "GYM"]) > 0:
             continue
+
         if task['Команда'] not in [board.name for board in client.boards]:
             client.boards.create(name=task['Команда'], defaultQueue='GYM')
         client.issues.create(queue='Gym', summary=task['Имя'], storyPoints=task['Трудозатраты'])
@@ -57,6 +58,31 @@ def put_data_to_tracker(parsed_csv: dict):
             rel_sum = [issue['Имя'] for issue in parsed_csv if int(issue['Идентификатор']) == int(rel)][0]
             rel_key = [issue.key for issue in client.issues if issue.summary == rel_sum and issue.resolution == None and issue.queue.key == "GYM"][0]
             issue.links.create(issue=rel_key, relationship='depends on')
+
+
+def filter_for_level(data):
+    res = []
+    nodes = {item['key']: item for item in data}
+    levels = defaultdict(list)
+
+    def compute_level(node_id):
+        if node_id not in nodes:
+            return -1
+        node = nodes[node_id]
+        if not node['dependsOn']:
+            return 0
+        dependson_levels = [compute_level(dependent_id) for dependent_id in node['dependsOn']]
+        return max(dependson_levels) + 1
+
+    for item in data:
+        level = compute_level(item['key'])
+        levels[level].append(item)
+
+    for level, nodes in levels.items():
+        res.append(nodes)
+
+    return res
+
 
 
 def get_data_from_tracker():
