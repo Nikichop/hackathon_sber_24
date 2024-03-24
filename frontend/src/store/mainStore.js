@@ -1,13 +1,12 @@
 import { defineStore } from "pinia";
 import axios from 'axios';
-import mapData from "./mapData";
 
 export const useMainStore = defineStore('mainStore', {
   state: () => {
     return {
       serverUrl: 'http://localhost:8000/',
       sortedTasksArray: [],
-      groups: ['Аля', 'Даля'],
+      groups: [],
       selectedGroup: '',
       isFileLoaded: false,
       isLoading: false,

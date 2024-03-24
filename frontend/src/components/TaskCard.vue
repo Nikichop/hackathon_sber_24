@@ -5,11 +5,11 @@
       variant="outlined"
       class="ma-12"
       ref="panel"
-      :style="isFocused ? 'border-color: orange; border-width: medium' : ''"
+      :style="isFocused ? 'border-color: orange; border-width: thick' : ''"
     >
       <v-expansion-panels>
         <v-expansion-panel focusable>
-          <v-expansion-panel-title style="background-color: aqua;">
+          <v-expansion-panel-title :style="`background-color: ${getColorTitle};`">
             <div style="width: 80%;">
               <h4>{{ group }}</h4>
               <h3>{{ id }}: {{ taskTitle }}</h3>
@@ -149,7 +149,22 @@ export default {
       return this.statuses[this.status];
     },
     getColorTitle() {
-      return 
+      const nowDate = new Date();
+      const endDate = Date.parse(this.endDate);
+
+      if (nowDate > endDate) {
+        return 'red';
+      }
+
+      if (this.status === 'done') {
+        return 'lightgreen';
+      }
+      
+      if (this.risk > 0.5) {
+        return 'yellow';
+      }
+
+      return 'aqua';
     },
     getDependsOn() {
       return this.dependsOn
@@ -174,7 +189,7 @@ export default {
         },
         {
           name: 'Выделенное время',
-          value: this.cost,
+          value: this.cost + 'д',
         },
         {
           name: 'Ссылка на задачу',
