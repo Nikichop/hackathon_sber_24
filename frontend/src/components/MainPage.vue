@@ -3,13 +3,15 @@
     <v-row 
       class="row"
     >
-      <tasks-container 
+      <tasks-container
+        v-if="!isLoading"
         v-for="(value, index) in sortedTasksArray"
         :tasks="value"
         :index-number="index + 1"
         ref="containers"
         @focus-card="onFocus"
       ></tasks-container>
+      <h1 v-else>Загрузка...</h1>
     </v-row>
 </template>
 <script>
@@ -27,7 +29,7 @@ export default {
     LoadForm,
   },
   computed: {
-    ...mapState(useMainStore, ['sortedTasksArray'])
+    ...mapState(useMainStore, ['sortedTasksArray', 'isLoading'])
   },
   methods: {
     onFocus(taskKey) {

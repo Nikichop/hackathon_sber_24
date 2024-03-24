@@ -24,7 +24,7 @@
           <v-btn 
               class="mr-4"
               size="large"
-              :disabled="!file?.length"
+              :disabled="!file?.length && isLoading"
               @click="uploadFile(file[0])"
             >
               Загрузить файл
@@ -34,7 +34,7 @@
           <v-btn
             color="green"
             size="large"
-            :disabled="!selectedGroup && !isFileLoaded"
+            :disabled="!selectedGroup && !isFileLoaded && isLoading"
             @click="updateTasksList"
           >
             Обновить
@@ -52,7 +52,7 @@ import { useMainStore } from '../store/mainStore'
 export default {
   name: 'LoadForm',
   computed: {
-    ...mapState(useMainStore, ['groups', 'isFileLoaded']),
+    ...mapState(useMainStore, ['groups', 'isFileLoaded', 'isLoading']),
     ...mapWritableState(useMainStore, ['selectedGroup']),
   },
   data() {
