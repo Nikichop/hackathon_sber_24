@@ -42,19 +42,21 @@ def parse_csv_with_multiple_parents(csv_content: str) -> List[Dict]:
 
 def put_data_to_tracker(parsed_csv: dict):
     for task in parsed_csv:
-        if len(client.issues.find(f'Summary: "{task['Имя']}" Resolution: empty() Queue: "GYM"')) > 0:
-            issues = client.issues.find(f'Summary: "{task['Имя']}" Resolution: empty() Queue: "GYM"')
+        if len([issue for issue in client.issues if issue.summary == task['Имя'] and issue.resolution == None]) > 0:
             continue
-
-        issue = client.issues.create(queue='Gym', summary=task['Имя'])
         if task['Команда'] not in [board.name for board in client.boards]:
             client.boards.create(name=task['Команда'], defaultQueue='GYM')
-
-        board_id = 1
-        for board in client.boards:
-            if board.name == task['Команда']:
-                board_id = board.id
+        client.issues.create(queue='Gym', summary=task['Имя'])
+    
+    for task in parsed_csv:
+        board_id = [board.id for board in client.boards if board.name == task['Команда']][0]
+        issue = [issue for issue in client.issues if issue.summary == task['Имя'] and issue.resolution == None][0]
         issue.update(boards=[{'id': board_id}])
+
+        for rel in task['Сделать после']:
+            rel_sum = [issue['Имя'] for issue in parsed_csv if int(issue['Идентификатор']) == int(rel)][0]
+            rel_key = [issue.key for issue in client.issues if issue.summary == rel_sum and issue.resolution == None][0]
+            issue.links.create(issue=rel_key, relationship='depends on')
 
 
 @app.post("/upload/")
